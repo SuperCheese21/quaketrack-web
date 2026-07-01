@@ -24,6 +24,15 @@ interface JournalEntry {
  * the only option. The service runs a single instance, so there's no race.
  */
 export const runMigrations = async (): Promise<void> => {
+  // TEMP diagnostics: identify the bound DB role/search_path so we know which
+  // schema the app user is actually allowed to create objects in.
+  const [ident] = await client<
+    { current_user: string; current_database: string; search_path: string }[]
+  >`SELECT current_user, current_database() AS current_database, current_setting('search_path') AS search_path`;
+  console.log(
+    `[db] connected as user=${ident.current_user} db=${ident.current_database} search_path=${ident.search_path}`,
+  );
+
   await client.unsafe(
     `CREATE TABLE IF NOT EXISTS "_migrations" (
        "tag" text PRIMARY KEY,
