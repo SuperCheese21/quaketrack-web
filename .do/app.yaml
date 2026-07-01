@@ -13,6 +13,14 @@
 name: quaketrack
 region: nyc
 
+# Custom domain. DNS stays at Squarespace (external): add a CNAME from
+# quaketrack -> quaketrack-zxifm.ondigitalocean.app. No `zone` here, so App
+# Platform treats DNS as externally managed and issues a Let's Encrypt cert
+# once the CNAME resolves.
+domains:
+  - domain: quaketrack.stratospherelabs.io
+    type: PRIMARY
+
 services:
   - name: api
     dockerfile_path: Dockerfile
