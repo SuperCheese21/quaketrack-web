@@ -82,3 +82,18 @@ export const BackIcon = (props: IconProps) => (
     <polyline points="12 19 5 12 12 5" />
   </svg>
 );
+
+export const PaletteIcon = (props: IconProps) => (
+  <svg {...base(props)}>
+    <path d="M12 2a10 10 0 0 0 0 20 2.5 2.5 0 0 0 2.5-2.5c0-.7-.28-1.3-.73-1.77-.44-.46-.72-1.06-.72-1.73A2.5 2.5 0 0 1 15.5 13H18a4 4 0 0 0 4-4c0-4.42-4.48-7-10-7z" />
+    <circle cx="7.5" cy="10.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="10.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="15.5" cy="7.5" r="1" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+export const CheckIcon = (props: IconProps) => (
+  <svg {...base(props)}>
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);

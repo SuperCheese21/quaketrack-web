@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { Button } from 'stratosphere-ui';
 
+import ThemeButton from './ThemeButton';
 import { BellIcon, FilterIcon, ListIcon, MapIcon } from './icons';
 
 interface HeaderBarProps {
@@ -33,6 +34,7 @@ const HeaderBar = ({ onOpenFilters, onOpenNotifications }: HeaderBarProps) => (
     </nav>
 
     <div className="navbar-end gap-1">
+      <ThemeButton />
       <Button
         color="ghost"
         shape="circle"

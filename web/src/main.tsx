@@ -9,6 +9,7 @@ import './index.css';
 
 import App from './App';
 import { FiltersProvider } from './lib/useFilters';
+import { ThemeProvider } from './lib/useTheme';
 import { registerServiceWorker } from './lib/push';
 import { trpc } from './trpc';
 
@@ -27,9 +28,11 @@ const Root = () => {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <FiltersProvider>
-            <App />
-          </FiltersProvider>
+          <ThemeProvider>
+            <FiltersProvider>
+              <App />
+            </FiltersProvider>
+          </ThemeProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </trpc.Provider>

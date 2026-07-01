@@ -1,6 +1,8 @@
 import { CircleMarker, MapContainer, Polyline, TileLayer } from 'react-leaflet';
 
 import { magnitudeColor } from '../lib/colorUtil';
+import { CARTO_ATTRIBUTION, cartoTileUrl } from '../lib/mapTheme';
+import { useTheme } from '../lib/useTheme';
 import type { EarthquakeDetail } from '../trpc';
 
 // Web port of src/components/ShakeMap.js + ShakeMapOverlay.js — a focused map
@@ -8,12 +10,14 @@ import type { EarthquakeDetail } from '../trpc';
 const ShakeMap = ({ detail }: { detail: EarthquakeDetail }) => {
   const { earthquake, contours } = detail;
   const center: [number, number] = [earthquake.latitude, earthquake.longitude];
+  const { isDark } = useTheme();
 
   return (
     <MapContainer center={center} zoom={6} className="h-full w-full rounded-lg">
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        key={isDark ? 'dark' : 'light'}
+        attribution={CARTO_ATTRIBUTION}
+        url={cartoTileUrl(isDark)}
       />
 
       {contours.flatMap((feature, featureIndex) =>

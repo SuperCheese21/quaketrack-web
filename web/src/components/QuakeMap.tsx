@@ -12,6 +12,12 @@ import platesData from '../data/tectonic_plates.json';
 import regionsData from '../data/tectonic_regions.json';
 import { magnitudeColor } from '../lib/colorUtil';
 import { formatMagnitude, formatTime } from '../lib/format';
+import { useTheme } from '../lib/useTheme';
+import {
+  CARTO_ATTRIBUTION,
+  cartoTileUrl,
+  plateBoundaryColor,
+} from '../lib/mapTheme';
 import type { Earthquake } from '../trpc';
 
 const plates = platesData as unknown as GeoJsonObject;
@@ -22,6 +28,7 @@ const markerRadius = (mag: number): number => Math.max(4, mag * 2);
 
 const QuakeMap = ({ quakes }: { quakes: Earthquake[] }) => {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
 
   return (
     <MapContainer
@@ -32,8 +39,9 @@ const QuakeMap = ({ quakes }: { quakes: Earthquake[] }) => {
       className="h-full w-full"
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        key={isDark ? 'dark' : 'light'}
+        attribution={CARTO_ATTRIBUTION}
+        url={cartoTileUrl(isDark)}
       />
 
       {/* Tectonic regions (red translucent) + plate boundaries (dark lines),
@@ -43,8 +51,9 @@ const QuakeMap = ({ quakes }: { quakes: Earthquake[] }) => {
         style={{ color: 'red', weight: 1, fillColor: 'red', fillOpacity: 0.1 }}
       />
       <GeoJSON
+        key={isDark ? 'plates-dark' : 'plates-light'}
         data={plates}
-        style={{ color: '#9ca3af', weight: 1.5, fill: false }}
+        style={{ color: plateBoundaryColor(isDark), weight: 1.5, fill: false }}
       />
 
       {quakes.map((quake) => (

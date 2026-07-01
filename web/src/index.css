@@ -2,7 +2,8 @@
 
 /* Load DaisyUI (peer dependency of stratosphere-ui) with light + dark themes. */
 @plugin 'daisyui' {
-  themes: light --default, dark --prefersdark;
+  themes: light --default, dark --prefersdark, night, forest, emerald,
+    synthwave, cyberpunk, dracula, abyss;
 }
 
 /* Tailwind v4 ignores node_modules by default — tell it to scan the
@@ -24,6 +25,7 @@ body {
 .leaflet-container {
   height: 100%;
   width: 100%;
-  background: #aadaff;
+  /* Neutral tile-loading backdrop that follows the active theme. */
+  background: var(--color-base-300);
   z-index: 0;
 }
