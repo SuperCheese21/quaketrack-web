@@ -25,6 +25,7 @@ export const ThemeButton = () => {
       buttonProps={{
         color: 'ghost',
         shape: 'circle',
+        className: 'text-primary-content',
         'aria-label': 'Select theme',
         title: 'Select theme',
         children: <PaletteIcon />,

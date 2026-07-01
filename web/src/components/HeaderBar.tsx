@@ -38,6 +38,7 @@ const HeaderBar = ({ onOpenFilters, onOpenNotifications }: HeaderBarProps) => (
       <Button
         color="ghost"
         shape="circle"
+        className="text-primary-content"
         aria-label="Filters"
         onClick={onOpenFilters}
       >
@@ -46,6 +47,7 @@ const HeaderBar = ({ onOpenFilters, onOpenNotifications }: HeaderBarProps) => (
       <Button
         color="ghost"
         shape="circle"
+        className="text-primary-content"
         aria-label="Notification settings"
         onClick={onOpenNotifications}
       >
