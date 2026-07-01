@@ -6,7 +6,7 @@
 # One app, three components sharing a domain:
 #   - api  (service)      Express/tRPC + background USGS poller, from Dockerfile
 #   - web  (static_site)  Vite/React SPA, served at /
-#   - db   (database)     Managed Postgres (dev database)
+#   - db   (database)     Managed Postgres cluster (app binds doadmin)
 #
 # Ingress routes /trpc -> api and everything else -> web, so the SPA's relative
 # `/trpc` calls hit the API on the same origin (no CORS, no hardcoded API URL).
@@ -67,7 +67,14 @@ static_sites:
       - path: /
 
 databases:
+  # Managed Postgres. Dev databases bind a non-owner `db` user with no CREATE
+  # rights on the database or the public schema (Postgres 15+ lockdown), so the
+  # app can't create its tables. A managed cluster binds `doadmin` (owner), so
+  # the boot migrations succeed.
   - name: db
     engine: PG
     version: "16"
-    production: false
+    production: true
+    cluster_name: quaketrack-db
+    size: db-s-1vcpu-1gb
+    num_nodes: 1
