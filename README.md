@@ -12,7 +12,7 @@ magnitude threshold — even when the tab is closed. Responsive and installable 
 - **TypeScript** everywhere
 - **Node + Express + tRPC** backend (`server/`)
 - **Drizzle ORM + SQLite** (`better-sqlite3`) for push subscriptions & notification settings
-- **web-push** (VAPID) + a USGS poller for background notifications
+- **web-push** (VAPID) for background notifications, driven by the EMSC/SeismicPortal real-time websocket (with a USGS poller fallback)
 - **React + Vite** frontend (`web/`)
 - **TailwindCSS + DaisyUI + stratosphere-ui** for the UI
 - **React-Leaflet + OpenStreetMap** for maps
@@ -33,10 +33,12 @@ Open http://localhost:5173. The Vite dev server proxies `/trpc` to the backend.
 ## Layout
 
 ```
-server/   Node + tRPC + Drizzle + web-push + USGS poller
+server/   Node + tRPC + Drizzle + web-push + EMSC websocket / USGS poller
 web/      Vite + React + Tailwind/DaisyUI + stratosphere-ui + Leaflet
 ```
 
-See [`server/README`](server) routers in `server/src/router` and the poller in
-`server/src/services/poller.ts`. The frontend screens live in `web/src/pages` and reusable
+See [`server/README`](server) routers in `server/src/router` and the notification
+sources in `server/src/services/emsc.ts` (real-time websocket) and
+`server/src/services/poller.ts` (USGS fallback), which share
+`server/src/services/notifier.ts`. The frontend screens live in `web/src/pages` and reusable
 UI in `web/src/components`.

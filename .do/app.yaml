@@ -4,7 +4,7 @@
 #   Update:  doctl apps update <APP_ID> --spec .do/app.yaml
 #
 # One app, three components sharing a domain:
-#   - api  (service)      Express/tRPC + background USGS poller, from Dockerfile
+#   - api  (service)      Express/tRPC + EMSC real-time notifier, from Dockerfile
 #   - web  (static_site)  Vite/React SPA, served at /
 #   - db   (database)     Managed Postgres cluster (app binds doadmin)
 #
@@ -51,6 +51,9 @@ services:
       - key: VAPID_SUBJECT
         scope: RUN_TIME
         value: mailto:ethan.shields21@gmail.com
+      - key: NOTIFICATION_SOURCE
+        scope: RUN_TIME
+        value: "emsc"
       - key: POLL_INTERVAL_MS
         scope: RUN_TIME
         value: "60000"

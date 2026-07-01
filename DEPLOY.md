@@ -80,6 +80,7 @@ spec changes: `doctl apps update <APP_ID> --spec .do/app.yaml`.
 | `VAPID_PUBLIC_KEY`   | secret           | `npm run gen-vapid`                       |
 | `VAPID_PRIVATE_KEY`  | secret           | `npm run gen-vapid`                       |
 | `VAPID_SUBJECT`      | spec             | `mailto:` contact URI                     |
-| `POLL_INTERVAL_MS`   | spec             | USGS poll cadence (default 60000)         |
-| `POLL_MIN_MAGNITUDE` | spec             | Poller magnitude floor (default 2)        |
+| `NOTIFICATION_SOURCE`| spec             | `emsc` (real-time WS, default) or `usgs`  |
+| `POLL_INTERVAL_MS`   | spec             | USGS poll cadence, `usgs` only (def 60000)|
+| `POLL_MIN_MAGNITUDE` | spec             | Magnitude floor, both sources (default 2) |
 | `PORT`               | injected         | App Platform sets it; server honors it    |

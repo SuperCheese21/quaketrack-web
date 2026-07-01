@@ -4,6 +4,15 @@ export const USGS_QUERY_URL = `${USGS_DOMAIN}/fdsnws/event/1/query`;
 export const USGS_GEOSERVE_PLACES = `${USGS_DOMAIN}/ws/geoserve/places.json`;
 export const USGS_GEOSERVE_REGIONS = `${USGS_DOMAIN}/ws/geoserve/regions.json`;
 
+// EMSC / SeismicPortal real-time websocket feed. Pushes events within seconds
+// of detection, far faster than polling USGS. See:
+// https://www.seismicportal.eu/realtime.html
+export const EMSC_WEBSOCKET_URL =
+  'wss://www.seismicportal.eu/standing_order/websocket';
+// Per-event page on the SeismicPortal, keyed by the EMSC `unid`.
+export const EMSC_EVENT_URL = (unid: string): string =>
+  `https://www.seismicportal.eu/eventdetails.html?unid=${unid}`;
+
 export const TIMESTAMP_FORMAT = 'YYYY-MM-DD HH:mm:ss UTC';
 
 // 16-point compass, used to turn a bearing into a cardinal direction
