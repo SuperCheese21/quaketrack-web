@@ -40,14 +40,18 @@ everything else → web) keeps the API same-origin — no CORS, no hardcoded API
    (Or set them in the console under the `api` component → Environment Variables,
    marked as encrypted.)
 
-4. Push the database schema once against the managed Postgres. Get its public
-   connection string and run Drizzle:
+4. The database schema is applied automatically. App Platform dev databases are
+   only reachable from inside the app, so the server runs Drizzle migrations on
+   boot (see `server/src/db/migrate.ts`) using the committed SQL in
+   `server/drizzle/`. After changing `schema.ts`, regenerate and commit:
 
    ```sh
-   DB_ID=$(doctl databases list --format ID,Name --no-header | awk '/quaketrack/{print $1}')
-   export DATABASE_URL=$(doctl databases connection "$DB_ID" --format URI --no-header)
-   npm run db:push --workspace server
+   npm run db:generate --workspace server   # writes server/drizzle/*.sql
+   git add server/drizzle && git commit -m "db: <change>" && git push
    ```
+
+   The next deploy applies them. (Locally, `npm run db:push --workspace server`
+   against a reachable Postgres still works for quick iteration.)
 
 ## Ongoing deploys
 
