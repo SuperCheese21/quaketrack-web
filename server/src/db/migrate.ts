@@ -24,14 +24,37 @@ interface JournalEntry {
  * the only option. The service runs a single instance, so there's no race.
  */
 export const runMigrations = async (): Promise<void> => {
-  // TEMP diagnostics: identify the bound DB role/search_path so we know which
-  // schema the app user is actually allowed to create objects in.
+  // TEMP diagnostics: identify what this bound DB role is actually allowed to do.
   const [ident] = await client<
-    { current_user: string; current_database: string; search_path: string }[]
-  >`SELECT current_user, current_database() AS current_database, current_setting('search_path') AS search_path`;
+    {
+      current_user: string;
+      current_database: string;
+      search_path: string;
+      db_create: boolean;
+      public_create: boolean;
+    }[]
+  >`SELECT current_user,
+           current_database() AS current_database,
+           current_setting('search_path') AS search_path,
+           has_database_privilege(current_database(), 'CREATE') AS db_create,
+           has_schema_privilege('public', 'CREATE') AS public_create`;
   console.log(
-    `[db] connected as user=${ident.current_user} db=${ident.current_database} search_path=${ident.search_path}`,
+    `[db] identity user=${ident.current_user} db=${ident.current_database} ` +
+      `search_path=${ident.search_path} db_create=${ident.db_create} ` +
+      `public_create=${ident.public_create}`,
   );
+  const schemas = await client<{ nspname: string; owner: string }[]>`
+    SELECT n.nspname, pg_get_userbyid(n.nspowner) AS owner
+    FROM pg_namespace n
+    WHERE n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema'`;
+  console.log('[db] schemas:', JSON.stringify(schemas));
+  try {
+    await client.unsafe('CREATE SCHEMA IF NOT EXISTS "db"');
+    console.log('[db] probe: CREATE SCHEMA "db" OK');
+  } catch (e) {
+    console.log('[db] probe: CREATE SCHEMA "db" FAILED:', (e as Error).message);
+  }
+  // END TEMP diagnostics
 
   await client.unsafe(
     `CREATE TABLE IF NOT EXISTS "_migrations" (
