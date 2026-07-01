@@ -1,0 +1,26 @@
+{
+  "name": "quaketrack-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web version of the QuakeTrack earthquake tracker + alerting app",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "npm run dev --workspace server",
+    "dev:web": "npm run dev --workspace web",
+    "build": "npm run build --workspace server && npm run build --workspace web",
+    "start": "npm run start --workspace server",
+    "db:push": "npm run db:push --workspace server",
+    "gen-vapid": "npm run gen-vapid --workspace server",
+    "typecheck": "npm run typecheck --workspace server && npm run typecheck --workspace web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

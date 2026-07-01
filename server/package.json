@@ -1,0 +1,41 @@
+{
+  "name": "@quaketrack/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/router/index.ts",
+  "types": "src/router/index.ts",
+  "exports": {
+    ".": "./src/router/index.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "gen-vapid": "web-push generate-vapid-keys",
+    "test:push": "tsx src/scripts/test-push.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trpc/server": "^11.0.0",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.0",
+    "express": "^4.21.2",
+    "postgres": "^3.4.5",
+    "web-push": "^3.6.7",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.5",
+    "@types/web-push": "^3.6.4",
+    "drizzle-kit": "^0.30.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

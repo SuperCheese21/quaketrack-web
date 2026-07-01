@@ -1,0 +1,40 @@
+{
+  "name": "@quaketrack/web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "gen-icons": "node scripts/gen-icons.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@quaketrack/server": "*",
+    "@tanstack/react-query": "^5.62.0",
+    "@trpc/client": "^11.0.0",
+    "@trpc/react-query": "^11.0.0",
+    "dayjs": "^1.11.13",
+    "leaflet": "^1.9.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.0",
+    "react-leaflet": "^4.2.1",
+    "react-router-dom": "^6.28.0",
+    "stratosphere-ui": "^3.1.9",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/leaflet": "^1.9.15",
+    "@types/node": "^22.10.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "daisyui": "^5.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}

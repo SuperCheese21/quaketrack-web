@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+
+/* Load DaisyUI (peer dependency of stratosphere-ui) with light + dark themes. */
+@plugin 'daisyui' {
+  themes: light --default, dark --prefersdark;
+}
+
+/* Tailwind v4 ignores node_modules by default — tell it to scan the
+   stratosphere-ui build so the DaisyUI/Tailwind classes it uses are generated. */
+@source '../../node_modules/stratosphere-ui/dist';
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+/* Leaflet needs an explicit height on its container. */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #aadaff;
+  z-index: 0;
+}

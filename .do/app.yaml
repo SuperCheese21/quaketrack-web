@@ -1,0 +1,73 @@
+# DigitalOcean App Platform spec for QuakeTrack.
+#
+#   Deploy:  doctl apps create --spec .do/app.yaml
+#   Update:  doctl apps update <APP_ID> --spec .do/app.yaml
+#
+# One app, three components sharing a domain:
+#   - api  (service)      Express/tRPC + background USGS poller, from Dockerfile
+#   - web  (static_site)  Vite/React SPA, served at /
+#   - db   (database)     Managed Postgres (dev database)
+#
+# Ingress routes /trpc -> api and everything else -> web, so the SPA's relative
+# `/trpc` calls hit the API on the same origin (no CORS, no hardcoded API URL).
+name: quaketrack
+region: nyc
+
+services:
+  - name: api
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      repo: OWNER/quaketrack-web
+      branch: main
+      deploy_on_push: true
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    health_check:
+      http_path: /health
+    routes:
+      - path: /trpc
+        # Keep the /trpc prefix; the Express app mounts tRPC at /trpc.
+        preserve_path_prefix: true
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${db.DATABASE_URL}
+      - key: VAPID_PUBLIC_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: VAPID_PRIVATE_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: VAPID_SUBJECT
+        scope: RUN_TIME
+        value: mailto:ethan.shields21@gmail.com
+      - key: POLL_INTERVAL_MS
+        scope: RUN_TIME
+        value: "60000"
+      - key: POLL_MIN_MAGNITUDE
+        scope: RUN_TIME
+        value: "2"
+
+static_sites:
+  - name: web
+    source_dir: /
+    github:
+      repo: OWNER/quaketrack-web
+      branch: main
+      deploy_on_push: true
+    # --include=dev: the web build needs Vite/Tailwind/tsc (devDependencies),
+    # which npm would otherwise skip when the buildpack sets NODE_ENV=production.
+    build_command: npm ci --include=dev && npm run build --workspace web
+    output_dir: web/dist
+    # SPA fallback so client-side routes (/map, /quake/:id) serve index.html.
+    catchall_document: index.html
+    routes:
+      - path: /
+
+databases:
+  - name: db
+    engine: PG
+    version: "16"
+    production: false
