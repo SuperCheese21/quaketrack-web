@@ -7,6 +7,7 @@ build/
 *.sqlite
 *.sqlite-journal
 *.db
-data/
+# Only the server's SQLite/runtime dir — not e.g. web/src/data (committed source).
+server/data/
 .DS_Store
 web/dev-dist/
