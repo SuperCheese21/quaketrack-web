@@ -20,7 +20,7 @@ const useSsl = process.env.DATABASE_SSL !== 'false' && !isLocal;
 // and this single process (API + background poller) is the only consumer.
 const poolMax = Number(process.env.DB_POOL_MAX ?? 5);
 
-const client = postgres(connectionString, {
+export const client = postgres(connectionString, {
   max: poolMax,
   ssl: useSsl ? 'require' : false,
 });
