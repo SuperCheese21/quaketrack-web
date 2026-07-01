@@ -18,6 +18,10 @@ const migrationsFolder = fileURLToPath(
  * the service runs a single instance, so there's no migration race.
  */
 export const runMigrations = async (): Promise<void> => {
-  await migrate(db, { migrationsFolder });
+  // Keep the migrations bookkeeping table in the existing `public` schema.
+  // Managed/dev Postgres users often lack CREATE-on-database, so letting the
+  // migrator create its default `drizzle` schema fails with "permission denied
+  // for database". `public` already exists, so no schema creation is needed.
+  await migrate(db, { migrationsFolder, migrationsSchema: 'public' });
   console.log('[db] migrations up to date');
 };
