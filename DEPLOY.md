@@ -19,31 +19,45 @@ everything else → web) keeps the API same-origin — no CORS, no hardcoded API
   once via the console: **Apps → Create → GitHub → Authorize** (App Platform
   cannot pull from a repo it hasn't been granted access to).
 - VAPID keys: `npm run gen-vapid --workspace server`.
+- A **managed** Postgres cluster. App Platform *dev* databases bind a non-owner
+  user with no CREATE on the database or `public` schema (Postgres 15+ lockdown),
+  so the app can't create its tables — a managed cluster (app binds `doadmin`) is
+  required. App Platform attaches an *existing* cluster by name, so create it first:
+
+  ```sh
+  doctl databases create quaketrack-db --engine pg --version 16 \
+    --size db-s-1vcpu-1gb --num-nodes 1 --region nyc3
+  ```
+
+  The `databases` block in [`.do/app.yaml`](.do/app.yaml) references it by
+  `cluster_name`. Move it into your project with
+  `doctl projects resources assign <project-id> --resource=do:dbaas:<db-id>`, and
+  restrict access to the app with
+  `doctl databases firewalls append <db-id> --rule app:<app-id>`.
 
 ## First deploy
 
 1. Set the GitHub `repo: OWNER/quaketrack-web` in [`.do/app.yaml`](.do/app.yaml).
-2. Create the app (provisions the managed Postgres too):
+2. Create the app in your project (attaches the managed cluster above):
 
    ```sh
-   doctl apps create --spec .do/app.yaml
+   doctl apps create --spec .do/app.yaml --project-id <project-id>
    ```
 
-3. Set the VAPID secrets (kept out of the spec/git):
+3. Set the VAPID secrets. ⚠️ `type: SECRET` envs in the committed spec have **no
+   value**, and applying that spec with `doctl apps update` **clears** any
+   existing secret. So inject the values whenever you apply the spec (a temp copy
+   with `value:` lines added), or set them once in the console under the `api`
+   component → Environment Variables (encrypted) and avoid re-applying the spec
+   with `doctl`. Git-push deploys (`deploy_on_push`) reuse the stored spec and
+   preserve secrets — it's only `doctl apps update --spec` that wipes them.
 
-   ```sh
-   APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | awk '/quaketrack/{print $1}')
-   doctl apps update "$APP_ID" --spec .do/app.yaml \
-     --update-env "api:VAPID_PUBLIC_KEY=...,VAPID_PRIVATE_KEY=..."
-   ```
-
-   (Or set them in the console under the `api` component → Environment Variables,
-   marked as encrypted.)
-
-4. The database schema is applied automatically. App Platform dev databases are
-   only reachable from inside the app, so the server runs Drizzle migrations on
-   boot (see `server/src/db/migrate.ts`) using the committed SQL in
-   `server/drizzle/`. After changing `schema.ts`, regenerate and commit:
+4. The database schema is applied automatically: the server runs migrations on
+   boot (see `server/src/db/migrate.ts`) from the committed SQL in
+   `server/drizzle/`, tracked in a `public._migrations` table. (We use a small
+   custom runner rather than Drizzle's migrator because the latter creates a
+   `drizzle` schema, which needs CREATE-on-database privileges.) After changing
+   `schema.ts`, regenerate and commit:
 
    ```sh
    npm run db:generate --workspace server   # writes server/drizzle/*.sql
