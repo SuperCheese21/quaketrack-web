@@ -1,7 +1,9 @@
 # syntax=docker/dockerfile:1
 # Builds and runs the QuakeTrack tRPC/Express API (the `server` workspace).
 # The web workspace is a static site built separately by App Platform.
-FROM node:20-slim
+# Node 22: the EMSC notifier relies on the global `WebSocket` (stable since
+# Node 21); Node 20 lacks it and crashes at startup.
+FROM node:22-slim
 
 WORKDIR /app
 
