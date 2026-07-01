@@ -18,7 +18,7 @@ services:
     dockerfile_path: Dockerfile
     source_dir: /
     github:
-      repo: OWNER/quaketrack-web
+      repo: SuperCheese21/quaketrack-web
       branch: main
       deploy_on_push: true
     http_port: 8080
@@ -54,7 +54,7 @@ static_sites:
   - name: web
     source_dir: /
     github:
-      repo: OWNER/quaketrack-web
+      repo: SuperCheese21/quaketrack-web
       branch: main
       deploy_on_push: true
     # --include=dev: the web build needs Vite/Tailwind/tsc (devDependencies),
