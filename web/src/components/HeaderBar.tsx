@@ -9,7 +9,11 @@ interface HeaderBarProps {
 }
 
 const tabClassName = ({ isActive }: { isActive: boolean }): string =>
-  `tab gap-2 ${isActive ? 'tab-active font-semibold' : ''}`;
+  `tab gap-2 ${
+    isActive
+      ? 'tab-active font-semibold text-primary'
+      : 'text-primary-content/80 hover:text-primary-content'
+  }`;
 
 const HeaderBar = ({ onOpenFilters, onOpenNotifications }: HeaderBarProps) => (
   <header className="navbar min-h-14 bg-primary px-2 text-primary-content shadow-md sm:px-4">
