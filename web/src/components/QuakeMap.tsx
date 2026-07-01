@@ -32,8 +32,8 @@ const QuakeMap = ({ quakes }: { quakes: Earthquake[] }) => {
       className="h-full w-full"
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
       />
 
       {/* Tectonic regions (red translucent) + plate boundaries (dark lines),
@@ -44,7 +44,7 @@ const QuakeMap = ({ quakes }: { quakes: Earthquake[] }) => {
       />
       <GeoJSON
         data={plates}
-        style={{ color: '#111827', weight: 1.5, fill: false }}
+        style={{ color: '#9ca3af', weight: 1.5, fill: false }}
       />
 
       {quakes.map((quake) => (
