@@ -10,6 +10,18 @@ const MIN_MAGNITUDE = Number(process.env.POLL_MIN_MAGNITUDE ?? 2);
 const RECONNECT_MIN_MS = 2_000;
 const RECONNECT_MAX_MS = 60_000;
 
+// If a socket doesn't reach OPEN within this window, treat the connect as
+// failed and retry. Guards against `new WebSocket()` hanging forever when the
+// TCP connect stalls without ever firing onopen/onerror/onclose.
+const CONNECT_TIMEOUT_MS = 15_000;
+
+// Proactively recycle a healthy connection at this age. The global (undici)
+// WebSocket exposes no ping/pong, and the feed is silent between events, so we
+// have no way to notice a silently half-open TCP link (NAT / load-balancer idle
+// timeout, network blip) — no close frame ever arrives. A periodic recycle is
+// our only liveness guarantee: worst case the feed self-heals within this age.
+const CONNECTION_MAX_AGE_MS = 30 * 60_000;
+
 /** Shape of a SeismicPortal real-time message. */
 interface EmscMessage {
   action?: string;
@@ -69,13 +81,73 @@ const toQuake = (raw: string): NotifiableQuake | null => {
 
 let reconnectDelay = RECONNECT_MIN_MS;
 let stopped = false;
+let socket: WebSocket | null = null;
+let connectTimer: ReturnType<typeof setTimeout> | null = null;
+let ageTimer: ReturnType<typeof setTimeout> | null = null;
+
+const clearTimers = (): void => {
+  if (connectTimer !== null) {
+    clearTimeout(connectTimer);
+    connectTimer = null;
+  }
+  if (ageTimer !== null) {
+    clearTimeout(ageTimer);
+    ageTimer = null;
+  }
+};
+
+const scheduleReconnect = (delay: number): void => {
+  if (stopped) return;
+  console.warn(`[emsc] reconnecting in ${delay}ms`);
+  setTimeout(connect, delay);
+  // Grow the backoff for the *next* failure; onopen resets it to the floor.
+  reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_MAX_MS);
+};
+
+/**
+ * Tear down the active socket and schedule a reconnect. Idempotent for a given
+ * connection: the first caller (connect timeout, onclose, or age recycle) wins
+ * and the rest short-circuit, so a dead socket can never fan out into multiple
+ * overlapping reconnects. `immediate` skips the backoff for proactive recycles
+ * of a *healthy* connection, minimizing the window where an event could slip by.
+ */
+const teardown = (reason: string, immediate = false): void => {
+  if (socket === null) return;
+  const dead = socket;
+  socket = null;
+  clearTimers();
+  // Detach handlers first so the forced close can't re-enter teardown.
+  dead.onopen = dead.onmessage = dead.onerror = dead.onclose = null;
+  try {
+    dead.close();
+  } catch {
+    // Already closing/closed — nothing to do.
+  }
+  console.warn(`[emsc] connection lost (${reason})`);
+  scheduleReconnect(immediate ? 0 : reconnectDelay);
+};
 
 const connect = (): void => {
   if (stopped) return;
   const ws = new WebSocket(EMSC_WEBSOCKET_URL);
+  socket = ws;
+
+  // Bound the connect: if OPEN isn't reached in time, retry rather than hang.
+  connectTimer = setTimeout(() => {
+    if (socket === ws) teardown('connect timeout');
+  }, CONNECT_TIMEOUT_MS);
 
   ws.onopen = () => {
+    if (socket !== ws) return; // superseded by a newer connection
     reconnectDelay = RECONNECT_MIN_MS;
+    if (connectTimer !== null) {
+      clearTimeout(connectTimer);
+      connectTimer = null;
+    }
+    // Arm the liveness recycle for this connection.
+    ageTimer = setTimeout(() => {
+      if (socket === ws) teardown('max connection age', true);
+    }, CONNECTION_MAX_AGE_MS);
     console.log(`[emsc] connected to ${EMSC_WEBSOCKET_URL}`);
   };
 
@@ -94,10 +166,8 @@ const connect = (): void => {
   };
 
   ws.onclose = () => {
-    if (stopped) return;
-    console.warn(`[emsc] disconnected — reconnecting in ${reconnectDelay}ms`);
-    setTimeout(connect, reconnectDelay);
-    reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_MAX_MS);
+    if (socket !== ws) return; // already torn down by a watchdog
+    teardown('closed by server');
   };
 };
 
